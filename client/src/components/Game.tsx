@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useThree } from "@react-three/fiber";
-import Arena from "./Arena";
+import SimpleArena from "./SimpleArena";
 import Player from "./Player";
 import Bullet from "./Bullet";
 import { useSocket } from "../hooks/useSocket";
@@ -50,19 +50,13 @@ export default function Game() {
     </>
   );
 
-  if (!isConnected) {
-    return (
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="red" />
-      </mesh>
-    );
-  }
+  // Always render the arena and basic scene, even if not connected
+  console.log('Game rendering - connected:', isConnected, 'players:', Object.keys(players).length);
 
   return (
     <>
       <Lights />
-      <Arena />
+      <SimpleArena />
       
       {/* Render all players */}
       {Object.entries(players).map(([playerId, playerData]) => (

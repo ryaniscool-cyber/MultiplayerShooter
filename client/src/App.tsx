@@ -57,7 +57,7 @@ function App() {
         <KeyboardControls map={keyMap}>
           <Canvas
             camera={{
-              position: [0, 5, 10],
+              position: [0, 2, 5],
               fov: 75,
               near: 0.1,
               far: 1000
