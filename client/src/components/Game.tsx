@@ -1,0 +1,83 @@
+import { useEffect } from "react";
+import { useThree } from "@react-three/fiber";
+import Arena from "./Arena";
+import Player from "./Player";
+import Bullet from "./Bullet";
+import { useSocket } from "../hooks/useSocket";
+import { useGameState } from "../lib/stores/useGameState";
+import { useGameLoop } from "../hooks/useGameLoop";
+
+export default function Game() {
+  const { camera, gl } = useThree();
+  const { socket, isConnected } = useSocket();
+  const { players, bullets, localPlayerId } = useGameState();
+  
+  // Initialize game loop
+  useGameLoop();
+  
+  // Set up pointer lock for mouse look
+  useEffect(() => {
+    const canvas = gl.domElement;
+    
+    const handleClick = () => {
+      canvas.requestPointerLock();
+    };
+    
+    canvas.addEventListener('click', handleClick);
+    
+    return () => {
+      canvas.removeEventListener('click', handleClick);
+    };
+  }, [gl]);
+
+  // Lighting setup
+  const Lights = () => (
+    <>
+      <ambientLight intensity={0.4} />
+      <directionalLight
+        position={[10, 10, 5]}
+        intensity={1}
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-far={50}
+        shadow-camera-left={-10}
+        shadow-camera-right={10}
+        shadow-camera-top={10}
+        shadow-camera-bottom={-10}
+      />
+      <pointLight position={[0, 10, 0]} intensity={0.5} />
+    </>
+  );
+
+  if (!isConnected) {
+    return (
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="red" />
+      </mesh>
+    );
+  }
+
+  return (
+    <>
+      <Lights />
+      <Arena />
+      
+      {/* Render all players */}
+      {Object.entries(players).map(([playerId, playerData]) => (
+        <Player
+          key={playerId}
+          playerId={playerId}
+          playerData={playerData}
+          isLocal={playerId === localPlayerId}
+        />
+      ))}
+      
+      {/* Render all bullets */}
+      {bullets.map((bullet) => (
+        <Bullet key={bullet.id} bullet={bullet} />
+      ))}
+    </>
+  );
+}

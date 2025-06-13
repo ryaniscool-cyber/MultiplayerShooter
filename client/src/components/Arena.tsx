@@ -1,0 +1,70 @@
+import { useTexture } from "@react-three/drei";
+import * as THREE from "three";
+
+export default function Arena() {
+  const grassTexture = useTexture("/textures/grass.png");
+  const woodTexture = useTexture("/textures/wood.jpg");
+  
+  // Configure texture repeating
+  grassTexture.wrapS = grassTexture.wrapT = THREE.RepeatWrapping;
+  grassTexture.repeat.set(10, 10);
+  
+  woodTexture.wrapS = woodTexture.wrapT = THREE.RepeatWrapping;
+  woodTexture.repeat.set(2, 1);
+
+  return (
+    <group>
+      {/* Ground */}
+      <mesh position={[0, 0, 0]} receiveShadow>
+        <planeGeometry args={[40, 40]} />
+        <meshStandardMaterial map={grassTexture} />
+      </mesh>
+      
+      {/* Arena walls */}
+      {/* North wall */}
+      <mesh position={[0, 2.5, -20]} castShadow receiveShadow>
+        <boxGeometry args={[40, 5, 1]} />
+        <meshStandardMaterial map={woodTexture} />
+      </mesh>
+      
+      {/* South wall */}
+      <mesh position={[0, 2.5, 20]} castShadow receiveShadow>
+        <boxGeometry args={[40, 5, 1]} />
+        <meshStandardMaterial map={woodTexture} />
+      </mesh>
+      
+      {/* West wall */}
+      <mesh position={[-20, 2.5, 0]} castShadow receiveShadow>
+        <boxGeometry args={[1, 5, 40]} />
+        <meshStandardMaterial map={woodTexture} />
+      </mesh>
+      
+      {/* East wall */}
+      <mesh position={[20, 2.5, 0]} castShadow receiveShadow>
+        <boxGeometry args={[1, 5, 40]} />
+        <meshStandardMaterial map={woodTexture} />
+      </mesh>
+      
+      {/* Some cover objects */}
+      <mesh position={[5, 1, 0]} castShadow receiveShadow>
+        <boxGeometry args={[2, 2, 6]} />
+        <meshStandardMaterial color="#8B4513" />
+      </mesh>
+      
+      <mesh position={[-8, 1, 8]} castShadow receiveShadow>
+        <boxGeometry args={[3, 2, 3]} />
+        <meshStandardMaterial color="#696969" />
+      </mesh>
+      
+      <mesh position={[10, 1, -10]} castShadow receiveShadow>
+        <boxGeometry args={[4, 2, 2]} />
+        <meshStandardMaterial color="#556B2F" />
+      </mesh>
+      
+      <mesh position={[-5, 1, -5]} castShadow receiveShadow>
+        <boxGeometry args={[2, 2, 4]} />
+        <meshStandardMaterial color="#8B4513" />
+      </mesh>
+    </group>
+  );
+}
