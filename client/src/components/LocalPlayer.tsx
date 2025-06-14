@@ -27,9 +27,10 @@ export default function LocalPlayer() {
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
       if (document.pointerLockElement === gl.domElement) {
-        mouseMovement.current.x += event.movementX * 0.002;
-        mouseMovement.current.y += event.movementY * 0.002;
-        mouseMovement.current.y = Math.max(-Math.PI/2, Math.min(Math.PI/2, mouseMovement.current.y));
+        mouseMovement.current.x += event.movementX * 0.001; // Reduced sensitivity
+        mouseMovement.current.y += event.movementY * 0.001; // Reduced sensitivity
+        // Clamp vertical rotation
+        mouseMovement.current.y = Math.max(-Math.PI/3, Math.min(Math.PI/3, mouseMovement.current.y));
       }
     };
     
@@ -52,9 +53,10 @@ export default function LocalPlayer() {
       jump: keys.jump
     });
     
-    // Mouse look
+    // Mouse look - apply rotation to camera
+    camera.rotation.order = 'YXZ'; // Important for first-person controls
     camera.rotation.y = -mouseMovement.current.x;
-    camera.rotation.x = -mouseMovement.current.y;
+    camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, -mouseMovement.current.y));
     
     // Movement input
     direction.current.set(0, 0, 0);
