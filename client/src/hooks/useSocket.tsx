@@ -15,8 +15,10 @@ export function useSocket() {
 
   useEffect(() => {
     // Connect to socket server
-    const newSocket = io('http://localhost:5000', {
-      transports: ['websocket', 'polling']
+    const newSocket = io(window.location.origin || 'http://localhost:5000', {
+      transports: ['websocket', 'polling'],
+      autoConnect: true,
+      reconnection: false
     });
 
     newSocket.on('connect', () => {

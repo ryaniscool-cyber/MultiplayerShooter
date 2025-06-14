@@ -1,0 +1,122 @@
+import { useRef, useEffect } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useKeyboardControls } from "@react-three/drei";
+import * as THREE from "three";
+
+enum Controls {
+  forward = 'forward',
+  backward = 'backward',
+  left = 'left',
+  right = 'right',
+  jump = 'jump',
+  shoot = 'shoot',
+}
+
+export default function LocalPlayer() {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const { camera, gl } = useThree();
+  const [, getKeys] = useKeyboardControls<Controls>();
+  
+  // Movement state
+  const velocity = useRef(new THREE.Vector3());
+  const direction = useRef(new THREE.Vector3());
+  const isOnGround = useRef(true);
+  const mouseMovement = useRef({ x: 0, y: 0 });
+  
+  // Mouse look setup
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      if (document.pointerLockElement === gl.domElement) {
+        mouseMovement.current.x += event.movementX * 0.002;
+        mouseMovement.current.y += event.movementY * 0.002;
+        mouseMovement.current.y = Math.max(-Math.PI/2, Math.min(Math.PI/2, mouseMovement.current.y));
+      }
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    return () => document.removeEventListener('mousemove', handleMouseMove);
+  }, [gl]);
+
+  // Main game loop
+  useFrame((state, delta) => {
+    if (!meshRef.current) return;
+    
+    const keys = getKeys();
+    const mesh = meshRef.current;
+    
+    console.log('Keys pressed:', {
+      forward: keys.forward,
+      backward: keys.backward,
+      left: keys.left,
+      right: keys.right,
+      jump: keys.jump
+    });
+    
+    // Mouse look
+    camera.rotation.y = -mouseMovement.current.x;
+    camera.rotation.x = -mouseMovement.current.y;
+    
+    // Movement input
+    direction.current.set(0, 0, 0);
+    
+    if (keys.forward) direction.current.z -= 1;
+    if (keys.backward) direction.current.z += 1;
+    if (keys.left) direction.current.x -= 1;
+    if (keys.right) direction.current.x += 1;
+    
+    // Normalize diagonal movement
+    if (direction.current.length() > 0) {
+      direction.current.normalize();
+      
+      // Apply camera rotation to movement direction
+      const cameraDirection = new THREE.Vector3();
+      camera.getWorldDirection(cameraDirection);
+      const rightVector = new THREE.Vector3().crossVectors(cameraDirection, camera.up).normalize();
+      
+      const moveVector = new THREE.Vector3()
+        .addScaledVector(rightVector, direction.current.x)
+        .addScaledVector(cameraDirection, -direction.current.z);
+      moveVector.y = 0; // Keep movement horizontal
+      
+      velocity.current.x = moveVector.x * 8;
+      velocity.current.z = moveVector.z * 8;
+    } else {
+      velocity.current.x *= 0.8; // Friction
+      velocity.current.z *= 0.8;
+    }
+    
+    // Jumping
+    if (keys.jump && isOnGround.current) {
+      velocity.current.y = 12;
+      isOnGround.current = false;
+    }
+    
+    // Gravity
+    velocity.current.y -= 30 * delta;
+    
+    // Update position
+    mesh.position.add(velocity.current.clone().multiplyScalar(delta));
+    
+    // Ground collision
+    if (mesh.position.y <= 1) {
+      mesh.position.y = 1;
+      velocity.current.y = 0;
+      isOnGround.current = true;
+    }
+    
+    // Arena boundaries
+    mesh.position.x = Math.max(-19, Math.min(19, mesh.position.x));
+    mesh.position.z = Math.max(-19, Math.min(19, mesh.position.z));
+    
+    // Camera follow
+    camera.position.copy(mesh.position);
+    camera.position.y += 1.8;
+  });
+
+  return (
+    <mesh ref={meshRef} position={[0, 1, 0]} castShadow receiveShadow>
+      <boxGeometry args={[1, 2, 1]} />
+      <meshStandardMaterial color="#00ff00" />
+    </mesh>
+  );
+}

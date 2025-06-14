@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useThree } from "@react-three/fiber";
 import SimpleArena from "./SimpleArena";
+import LocalPlayer from "./LocalPlayer";
 import Player from "./Player";
 import Bullet from "./Bullet";
 import { useSocket } from "../hooks/useSocket";
@@ -9,8 +10,10 @@ import { useGameLoop } from "../hooks/useGameLoop";
 
 export default function Game() {
   const { camera, gl } = useThree();
-  const { socket, isConnected } = useSocket();
+  // Temporarily disable socket connection to fix movement
+  // const { socket, isConnected } = useSocket();
   const { players, bullets, localPlayerId } = useGameState();
+  const isConnected = false; // For now, just use local player
   
   // Initialize game loop
   useGameLoop();
@@ -57,9 +60,10 @@ export default function Game() {
     <>
       <Lights />
       <SimpleArena />
+      <LocalPlayer />
       
-      {/* Render all players */}
-      {Object.entries(players).map(([playerId, playerData]) => (
+      {/* Render multiplayer players when connected */}
+      {isConnected && Object.entries(players).map(([playerId, playerData]) => (
         <Player
           key={playerId}
           playerId={playerId}
