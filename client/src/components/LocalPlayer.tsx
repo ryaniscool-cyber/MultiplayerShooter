@@ -2,6 +2,8 @@ import { useRef, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useKeyboardControls } from "@react-three/drei";
 import * as THREE from "three";
+import { useGameState } from "../lib/stores/useGameState";
+import { useAudio } from "../lib/stores/useAudio";
 
 enum Controls {
   forward = 'forward',
@@ -16,12 +18,18 @@ export default function LocalPlayer() {
   const meshRef = useRef<THREE.Mesh>(null);
   const { camera, gl } = useThree();
   const [, getKeys] = useKeyboardControls<Controls>();
+  const { addBullet } = useGameState();
+  const { playHit } = useAudio();
   
   // Movement state
   const velocity = useRef(new THREE.Vector3());
   const direction = useRef(new THREE.Vector3());
   const isOnGround = useRef(true);
   const mouseMovement = useRef({ x: 0, y: 0 });
+  
+  // Shooting state
+  const lastShotTime = useRef(0);
+  const shootCooldown = 200; // ms between shots
   
   // Mouse look setup
   useEffect(() => {
@@ -34,9 +42,50 @@ export default function LocalPlayer() {
       }
     };
     
+    const handleMouseClick = (event: MouseEvent) => {
+      if (document.pointerLockElement === gl.domElement && meshRef.current) {
+        shoot();
+      }
+    };
+    
     document.addEventListener('mousemove', handleMouseMove);
-    return () => document.removeEventListener('mousemove', handleMouseMove);
+    document.addEventListener('click', handleMouseClick);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('click', handleMouseClick);
+    };
   }, [gl]);
+
+  // Shooting function
+  const shoot = () => {
+    const now = Date.now();
+    if (now - lastShotTime.current < shootCooldown || !meshRef.current) return;
+    
+    lastShotTime.current = now;
+    
+    const position = meshRef.current.position.clone();
+    position.y += 0.5; // Shoot from slightly above center
+    
+    const direction = new THREE.Vector3();
+    camera.getWorldDirection(direction);
+    
+    const bulletData = {
+      id: Date.now() + Math.random(),
+      position: position.toArray(),
+      direction: direction.toArray(),
+      playerId: 'local-player',
+      speed: 50,
+      createdAt: now
+    };
+    
+    // Add bullet locally
+    addBullet(bulletData);
+    
+    // Play sound
+    playHit();
+    
+    console.log('Shot fired:', bulletData);
+  };
 
   // Main game loop
   useFrame((state, delta) => {
@@ -91,6 +140,11 @@ export default function LocalPlayer() {
     if (keys.jump && isOnGround.current) {
       velocity.current.y = 12;
       isOnGround.current = false;
+    }
+    
+    // Shooting
+    if (keys.shoot) {
+      shoot();
     }
     
     // Gravity
