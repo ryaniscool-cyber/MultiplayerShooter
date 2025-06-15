@@ -12,7 +12,7 @@ export default function Game() {
   const { camera, gl } = useThree();
   // Temporarily disable socket connection to fix movement
   // const { socket, isConnected } = useSocket();
-  const { players, bullets, localPlayerId, isConnected, setLocalPlayerId, updatePlayer } = useGameState();
+  const { players, bullets, localPlayerId, setLocalPlayerId, updatePlayer } = useGameState();
   const isConnected = false; // For now, just use local player
 
   // Initialize game loop
