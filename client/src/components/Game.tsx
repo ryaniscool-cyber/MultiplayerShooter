@@ -12,26 +12,43 @@ export default function Game() {
   const { camera, gl } = useThree();
   // Temporarily disable socket connection to fix movement
   // const { socket, isConnected } = useSocket();
-  const { players, bullets, localPlayerId } = useGameState();
+  const { players, bullets, localPlayerId, isConnected, setLocalPlayerId, updatePlayer } = useGameState();
   const isConnected = false; // For now, just use local player
-  
+
   // Initialize game loop
   useGameLoop();
-  
+
   // Set up pointer lock for mouse look
   useEffect(() => {
     const canvas = gl.domElement;
-    
+
     const handleClick = () => {
       canvas.requestPointerLock();
     };
-    
+
     canvas.addEventListener('click', handleClick);
-    
+
     return () => {
       canvas.removeEventListener('click', handleClick);
     };
   }, [gl]);
+
+  // Initialize local player if not connected
+  useEffect(() => {
+    if (!isConnected && !localPlayerId) {
+      const tempPlayerId = 'local-' + Date.now();
+      setLocalPlayerId(tempPlayerId);
+      updatePlayer(tempPlayerId, {
+        id: tempPlayerId,
+        position: [0, 1, 0],
+        rotation: [0, 0, 0],
+        health: 100,
+        kills: 0,
+        deaths: 0,
+        isAlive: true
+      });
+    }
+  }, [isConnected, localPlayerId, setLocalPlayerId, updatePlayer]);
 
   // Lighting setup
   const Lights = () => (
@@ -61,7 +78,7 @@ export default function Game() {
       <Lights />
       <SimpleArena />
       <LocalPlayer />
-      
+
       {/* Render multiplayer players when connected */}
       {isConnected && Object.entries(players).map(([playerId, playerData]) => (
         <Player
@@ -71,7 +88,7 @@ export default function Game() {
           isLocal={playerId === localPlayerId}
         />
       ))}
-      
+
       {/* Render all bullets */}
       {bullets.map((bullet) => (
         <Bullet key={bullet.id} bullet={bullet} />

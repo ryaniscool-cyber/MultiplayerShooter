@@ -146,7 +146,7 @@ export default function Player({ playerId, playerData, isLocal }: PlayerProps) {
   });
 
   const shoot = () => {
-    if (!meshRef.current || !socket) return;
+    if (!meshRef.current) return;
     
     const position = meshRef.current.position.clone();
     position.y += 0.5; // Shoot from slightly above center
@@ -165,8 +165,10 @@ export default function Player({ playerId, playerData, isLocal }: PlayerProps) {
     // Add bullet locally for immediate feedback
     addBullet(bulletData);
     
-    // Send to server
-    socket.emit('shoot', bulletData);
+    // Send to server if connected
+    if (socket) {
+      socket.emit('shoot', bulletData);
+    }
     
     // Play sound
     playHit();

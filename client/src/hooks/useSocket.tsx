@@ -25,6 +25,17 @@ export function useSocket() {
       console.log('Connected to server');
       setIsConnected(true);
       setLocalPlayerId(newSocket.id);
+      
+      // Initialize local player in game state
+      updatePlayer(newSocket.id, {
+        id: newSocket.id,
+        position: [0, 1, 0],
+        rotation: [0, 0, 0],
+        health: 100,
+        kills: 0,
+        deaths: 0,
+        isAlive: true
+      });
     });
 
     newSocket.on('disconnect', () => {
@@ -50,6 +61,19 @@ export function useSocket() {
         delete newPlayers[playerId];
         return newPlayers;
       });
+    });
+
+    newSocket.on('bulletFired', (bulletData) => {
+      console.log('Bullet fired by other player:', bulletData);
+      addBullet(bulletData);
+    });
+
+    newSocket.on('bulletHit', (hitData) => {
+      console.log('Bullet hit:', hitData);
+      // Update player health
+      updatePlayer(hitData.playerId, { health: hitData.newHealth });
+      // Remove the bullet
+      removeBullet(hitData.bulletId);
     });
 
     newSocket.on('playerUpdate', (playerData) => {

@@ -26,7 +26,7 @@ const keyMap = [
   { name: Controls.left, keys: ['KeyA', 'ArrowLeft'] },
   { name: Controls.right, keys: ['KeyD', 'ArrowRight'] },
   { name: Controls.jump, keys: ['Space'] },
-  { name: Controls.shoot, keys: ['Mouse0'] },
+  { name: Controls.shoot, keys: ['Mouse0', 'Mouse1'] },
 ];
 
 function App() {
