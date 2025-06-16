@@ -31,21 +31,21 @@ const keyMap = [
 
 function App() {
   const { gamePhase } = useGameState();
-  
+
   // Initialize audio
   useEffect(() => {
     const { setBackgroundMusic, setHitSound, setSuccessSound } = useAudio.getState();
-    
+
     // Load sounds
     const bgMusic = new Audio('/sounds/background.mp3');
     bgMusic.loop = true;
     bgMusic.volume = 0.3;
     setBackgroundMusic(bgMusic);
-    
+
     const hitSound = new Audio('/sounds/hit.mp3');
     hitSound.volume = 0.5;
     setHitSound(hitSound);
-    
+
     const successSound = new Audio('/sounds/success.mp3');
     successSound.volume = 0.7;
     setSuccessSound(successSound);

@@ -7,6 +7,7 @@ import Bullet from "./Bullet";
 import { useSocket } from "../hooks/useSocket";
 import { useGameState } from "../lib/stores/useGameState";
 import { useGameLoop } from "../hooks/useGameLoop";
+import { useStorm } from "../hooks/useStorm";
 
 export default function Game() {
   const { camera, gl } = useThree();
@@ -15,8 +16,9 @@ export default function Game() {
   const { players, bullets, localPlayerId, setLocalPlayerId, updatePlayer } = useGameState();
   const isConnected = false; // For now, just use local player
 
-  // Initialize game loop
+  // Initialize game loop and storm
   useGameLoop();
+  useStorm();
 
   // Set up pointer lock for mouse look
   useEffect(() => {

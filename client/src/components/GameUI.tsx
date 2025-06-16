@@ -3,7 +3,7 @@ import { useAudio } from "../lib/stores/useAudio";
 import PlayerList from "./PlayerList";
 
 export default function GameUI() {
-  const { players, localPlayerId, isConnected } = useGameState();
+  const { players, localPlayerId, isConnected, storm, chests } = useGameState();
   const { isMuted, toggleMute } = useAudio();
   
   const localPlayer = localPlayerId ? players[localPlayerId] : null;
@@ -33,6 +33,8 @@ export default function GameUI() {
       }}>
         <div>Status: {isConnected ? 'Connected' : 'Disconnected'}</div>
         <div>Players: {playerCount}</div>
+        <div>Storm: {storm.isActive ? `Radius ${Math.round(storm.radius)}` : 'Incoming...'}</div>
+        <div>Chests: {chests.filter(c => !c.opened).length}/{chests.length}</div>
         <button
           onClick={toggleMute}
           style={{

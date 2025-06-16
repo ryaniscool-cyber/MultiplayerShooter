@@ -1,6 +1,6 @@
 import { useRef, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useKeyboardControls } from "@react-three/drei";
+import { useKeyboardControls, KeyboardControls } from "@react-three/drei";
 import * as THREE from "three";
 import { useGameState } from "../lib/stores/useGameState";
 import { useAudio } from "../lib/stores/useAudio";
@@ -13,6 +13,15 @@ enum Controls {
   jump = 'jump',
   shoot = 'shoot',
 }
+
+const keyMap = [
+  { name: Controls.forward, keys: ['ArrowUp', 'KeyW'] },
+  { name: Controls.backward, keys: ['ArrowDown', 'KeyS'] },
+  { name: Controls.left, keys: ['ArrowLeft', 'KeyA'] },
+  { name: Controls.right, keys: ['ArrowRight', 'KeyD'] },
+  { name: Controls.jump, keys: ['Space'] },
+  { name: Controls.shoot, keys: ['Mouse0'] },
+];
 
 export default function LocalPlayer() {
   const meshRef = useRef<THREE.Mesh>(null);
@@ -160,9 +169,9 @@ export default function LocalPlayer() {
       isOnGround.current = true;
     }
     
-    // Arena boundaries
-    mesh.position.x = Math.max(-19, Math.min(19, mesh.position.x));
-    mesh.position.z = Math.max(-19, Math.min(19, mesh.position.z));
+    // Arena boundaries - much larger now
+    mesh.position.x = Math.max(-49, Math.min(49, mesh.position.x));
+    mesh.position.z = Math.max(-49, Math.min(49, mesh.position.z));
     
     // Camera follow
     camera.position.copy(mesh.position);
