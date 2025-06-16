@@ -25,9 +25,6 @@ async function buildForGitHub() {
           '@': path.resolve(process.cwd(), './client/src'),
         },
       },
-      rollupOptions: {
-        input: path.resolve(process.cwd(), 'index.html'),
-      },
     });
     
     console.log('Build completed! Files are in ./docs directory');
